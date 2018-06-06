@@ -87,7 +87,6 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
             {
                 custom_tabs_activity_manager = new CustomTabsActivityManager(this.activity);
 
-                custom_tabs_activity_manager.BindService(package_name_for_custom_tabs);
                 //custom_tabs_intent.Intent.SetPackage(package_name_for_custom_tabs);
 
                 custom_tabs_session = custom_tabs_activity_manager.Session;
@@ -106,7 +105,6 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
 
 				CustomTabsHelper.AddKeepAliveExtra(activity, custom_tabs_intent.Intent);
 
-                //custom_tabs_intent.LaunchUrl(activity, uri);
 				custom_tabs_activity_manager.CustomTabsServiceConnected +=
                                 // custom_tabs_activit_manager_CustomTabsServiceConnected
                                 delegate
@@ -116,8 +114,6 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
                                         custom_tabs_activity_manager.LaunchUrl(uri.ToString());
 
                                         System.Diagnostics.Debug.WriteLine("CustomTabsActivityManager.LaunchUrl");
-
-                                        return;
                                     }
                                 ;
                 System.Diagnostics.Debug.WriteLine($"CustomTabsActivityManager.BindService({package_name_for_custom_tabs})");
@@ -125,21 +121,18 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
                 //custom_tabs_activity_manager.LaunchUrl(uri.ToString());
                 //------------------------------------------------------------------------------
 
-                if (service_bound == false)
+                if (!service_bound)
                 {
                     System.Diagnostics.Debug.WriteLine($"FALLBACK: No Packages that support CustomTabs");
 					// No Packages that support CustomTabs
 					fallback_neccessary = true;
                 }
-
             }
 
-            if (fallback_neccessary == true && fallback != null)
+            if (fallback_neccessary)
             {
-                fallback.OpenUri(activity, uri);
+                fallback?.OpenUri(activity, uri);
             }
-
-            return;
         }
 
         protected void custom_tabs_activit_manager_CustomTabsServiceConnected 
