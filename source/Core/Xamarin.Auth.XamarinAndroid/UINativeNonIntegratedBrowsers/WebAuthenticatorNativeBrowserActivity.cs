@@ -33,7 +33,7 @@ namespace Xamarin.Auth._MobileServices
 {
     [Activity
         (
-            Label = "Web Authenticator Native Broswer",
+            Label = "Web Authenticator Native Browser",
             // NoHistory = true,
             LaunchMode = global::Android.Content.PM.LaunchMode.SingleTop
         )
@@ -60,9 +60,9 @@ namespace Xamarin.Auth._MobileServices
             //--------------------------------------------------------------
             // Azure Mobile Services Team uses simplified code
             // this is for testing purposes of their launch only
-            LaunchCunstomTabsWithUrl =
-                    //LaunchCunstomTabsWithUrlDefault
-                    LaunchCunstomTabsWithUrlAzureMobileServiceClientTeamCode
+            LaunchCustomTabsWithUrl =
+                    //LaunchCustomTabsWithUrlDefault
+                    LaunchCustomTabsWithUrlAzureMobileServiceClientTeamCode
                     ;
             //--------------------------------------------------------------
 
@@ -140,18 +140,18 @@ namespace Xamarin.Auth._MobileServices
             CustomTabsConfiguration.Initialize(this);
             CustomTabsConfiguration.UICustomization();
 
-            LaunchCunstomTabsWithUrl();
+            LaunchCustomTabsWithUrl();
 
             return;
         }
 
-        public Action LaunchCunstomTabsWithUrl
+        public Action LaunchCustomTabsWithUrl
         {
             get;
             set;
         }
 
-        private void LaunchCunstomTabsWithUrlAzureMobileServiceClientTeamCode()
+        private void LaunchCustomTabsWithUrlAzureMobileServiceClientTeamCode()
         {
             CustomTabsConfiguration
                 .CustomTabActivityHelper
@@ -170,7 +170,7 @@ namespace Xamarin.Auth._MobileServices
             return;
         }
 
-        public void LaunchCunstomTabsWithUrlDefault()
+        public void LaunchCustomTabsWithUrlDefault()
         {
             //.......................................................
             // Launching CustomTabs and url - minimal
