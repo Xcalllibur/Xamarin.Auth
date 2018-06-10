@@ -44,7 +44,7 @@ namespace Xamarin.Auth._MobileServices
         {
             System.Uri uri_netfx = this.GetInitialUrlAsync().Result;
             global::Android.Net.Uri uri_android = global::Android.Net.Uri.Parse(uri_netfx.AbsoluteUri);
-            CustomTabsConfiguration.UriAndroidOS = uri_android;
+            CustomTabsBuilder.UriAndroidOS = uri_android;
             AuthenticateUIType ui = new AuthenticateUIType(context, typeof(WebAuthenticatorNativeBrowserActivity));
             ui.PutExtra("ClearCookies", ClearCookiesBeforeLogin);
             var state = new WebAuthenticatorNativeBrowserActivity.State

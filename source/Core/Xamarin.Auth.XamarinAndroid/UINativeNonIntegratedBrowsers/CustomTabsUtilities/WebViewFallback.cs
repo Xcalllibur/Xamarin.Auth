@@ -36,8 +36,6 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
         {
             //OpenUriSimple(activity, uri);
             OpenUriXamarinAuthWebViewActivity(activity, uri);
-
-            return;
         }
 
         protected void OpenUriSimple(Activity activity, Uri uri)
@@ -45,20 +43,13 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
             Intent intent = new Intent(Intent.ActionView);
             intent.SetData(uri);
             activity.StartActivity(intent);
-
-            return;
         }
-
 
         protected void OpenUriXamarinAuthWebViewActivity(Activity activity, Uri uri)
         {
             Intent intent = new Intent(activity, typeof(Xamarin.Auth.WebViewActivity));
             intent.PutExtra(Xamarin.Auth.WebViewActivity.EXTRA_URL, uri.ToString());
             activity.StartActivity(intent);
-
-            return;
         }
-
     }
-
 }

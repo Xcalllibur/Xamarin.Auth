@@ -72,7 +72,7 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
             return GetPackageNamesToUseImplementation
                         (
                             context,
-                            Xamarin.Auth.CustomTabsConfiguration.CustomTabsHelperUri
+                            Xamarin.Auth.CustomTabsBuilder.CustomTabsHelperUri
                         );
         }
 
@@ -256,7 +256,7 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
                 sb.Append(e.Message);
                 Log.Error
                         (
-                            Xamarin.Auth.CustomTabsConfiguration.CustomTabsHelperAndroidLogTag, 
+                            Xamarin.Auth.CustomTabsBuilder.CustomTabsHelperAndroidLogTag, 
                             sb.ToString()
                         );
             }

@@ -223,7 +223,7 @@
     <Compile Include="UINativeNonIntegratedBrowsers\CustomTabsUtilities\WebViewActivity.cs" />
     <Compile Include="UINativeNonIntegratedBrowsers\CustomTabsUtilities\WebViewFallback.cs" />
     <Compile Include="UINativeNonIntegratedBrowsers\WebAuthenticatorNativeBrowserActivity.cs" />
-    <Compile Include="UINativeNonIntegratedBrowsers\CustomTabsConfiguration.cs" />
+    <Compile Include="UINativeNonIntegratedBrowsers\CustomTabsBuilder.cs" />
     <Compile Include="PlatformSpecific\WebAuthenticatorActivity.WebClient.cs" />
     <Compile Include="UINativeNonIntegratedBrowsers\CustomTabsUtilities\CustomTabsActionsBroadcastReceiver.cs" />
     <Compile Include="Evolve16.Labs\OAuthLoginPresenter.XamarinAndroid.cs" />

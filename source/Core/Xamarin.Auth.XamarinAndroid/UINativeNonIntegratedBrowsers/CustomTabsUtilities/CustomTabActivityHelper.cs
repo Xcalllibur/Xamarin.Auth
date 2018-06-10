@@ -89,9 +89,9 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
 
                 //custom_tabs_intent.Intent.SetPackage(package_name_for_custom_tabs);
 
-                custom_tabs_session = custom_tabs_activity_manager.Session;
+                //custom_tabs_session = custom_tabs_activity_manager.Session;
 
-                custom_tabs_intent_builder = new CustomTabsIntent.Builder(custom_tabs_session);
+                //custom_tabs_intent_builder = new CustomTabsIntent.Builder(custom_tabs_session);
 
 
                 // direct call to CustomtTasIntent.LaunchUrl was ported from java samples and refactored
@@ -100,7 +100,7 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
                 //custom_tabs_intent.LaunchUrl(activity, uri);
                 //return;
                 //------------------------------------------------------------------------------
-				custom_tabs_intent = custom_tabs_intent_builder.Build();
+				//custom_tabs_intent = custom_tabs_intent_builder.Build();
 
 				CustomTabsHelper.AddKeepAliveExtra(activity, custom_tabs_intent.Intent);
 
@@ -110,7 +110,7 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
                                     {
                                         System.Diagnostics.Debug.WriteLine("CustomTabsActivityManager.CustomTabsServiceConnected");
 
-                                        custom_tabs_activity_manager.LaunchUrl(uri.ToString());
+                                        custom_tabs_activity_manager.LaunchUrl(uri.ToString(), custom_tabs_intent);
 
                                         System.Diagnostics.Debug.WriteLine("CustomTabsActivityManager.LaunchUrl");
                                     }
@@ -144,20 +144,20 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
 
             custom_tabs_intent_builder.EnableUrlBarHiding();
 
-            if (CustomTabsConfiguration.IsWarmUpUsed)
+            if (CustomTabsBuilder.IsWarmUpUsed)
             {
                 System.Diagnostics.Debug.WriteLine("CustomTabsActivityManager.WarmUp()");
                 client.Warmup(0);
                 //custom_tabs_activity_manager.Warmup();
             }
 
-			if (CustomTabsConfiguration.IsPrefetchUsed)
+			if (CustomTabsBuilder.IsPrefetchUsed)
 			{
 				System.Diagnostics.Debug.WriteLine("CustomTabsActivityManager PREFETCH");
 				custom_tabs_activity_manager.MayLaunchUrl(uri.ToString(), null, null);
 			}
 
-			if (CustomTabsConfiguration.AreAnimationsUsed)
+			if (CustomTabsBuilder.AreAnimationsUsed)
             {
                 custom_tabs_intent_builder.SetStartAnimations
                             (
@@ -336,7 +336,7 @@ namespace Android.Support.CustomTabs.Chromium.SharedUtilities._MobileServices
             System.Diagnostics.Debug.WriteLine("CustomTabsActivityHelper.OnServiceConnected");
 
             custom_tabs_client = client;
-            if (CustomTabsConfiguration.IsWarmUpUsed)
+            if (CustomTabsBuilder.IsWarmUpUsed)
             {
                 System.Diagnostics.Debug.WriteLine("    warmup");
 

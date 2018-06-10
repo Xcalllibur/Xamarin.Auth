@@ -137,8 +137,8 @@ namespace Xamarin.Auth._MobileServices
             };
 
             // Build the UI
-            CustomTabsConfiguration.Initialize(this);
-            CustomTabsConfiguration.UICustomization();
+            CustomTabsBuilder.Initialize(this);
+            CustomTabsBuilder.UICustomization();
 
             LaunchCustomTabsWithUrl();
 
@@ -153,18 +153,18 @@ namespace Xamarin.Auth._MobileServices
 
         private void LaunchCustomTabsWithUrlAzureMobileServiceClientTeamCode()
         {
-            CustomTabsConfiguration
+            CustomTabsBuilder
                 .CustomTabActivityHelper
                     .LaunchUrlWithCustomTabsOrFallback
                         (
                             // Activity/Context
                             this,
                             // CustomTabIntent
-                            CustomTabsConfiguration.CustomTabsIntent,
-                            CustomTabsConfiguration.PackageForCustomTabs,
-                            CustomTabsConfiguration.UriAndroidOS,
+                            CustomTabsBuilder.CustomTabsIntent,
+                            CustomTabsBuilder.PackageForCustomTabs,
+                            CustomTabsBuilder.UriAndroidOS,
                             //  Fallback if CustomTabs do not exist
-                            CustomTabsConfiguration.WebViewFallback
+                            CustomTabsBuilder.WebViewFallback
                         );
 
             return;
@@ -176,38 +176,38 @@ namespace Xamarin.Auth._MobileServices
             // Launching CustomTabs and url - minimal
             if
                 (
-                    CustomTabsConfiguration.CustomTabActivityHelper != null
+                    CustomTabsBuilder.CustomTabActivityHelper != null
                     &&
-                    CustomTabsConfiguration.CustomTabsIntent != null
+                    CustomTabsBuilder.CustomTabsIntent != null
                     &&
-                    CustomTabsConfiguration.UriAndroidOS != null
+                    CustomTabsBuilder.UriAndroidOS != null
                 )
             {
-                CustomTabsConfiguration
+                CustomTabsBuilder
                     .CustomTabsIntent
-                    .Intent.AddFlags(CustomTabsConfiguration.ActivityFlags);
+                    .Intent.AddFlags(CustomTabsBuilder.ActivityFlags);
 
-                CustomTabsConfiguration
+                CustomTabsBuilder
                     .CustomTabActivityHelper
                         .LaunchUrlWithCustomTabsOrFallback
                             (
                                 // Activity/Context
                                 this,
                                 // CustomTabInten
-                                CustomTabsConfiguration.CustomTabsIntent,
-                                CustomTabsConfiguration.PackageForCustomTabs,
-                                CustomTabsConfiguration.UriAndroidOS,
+                                CustomTabsBuilder.CustomTabsIntent,
+                                CustomTabsBuilder.PackageForCustomTabs,
+                                CustomTabsBuilder.UriAndroidOS,
                                 //  Fallback if CustomTabs do not exis
-                                CustomTabsConfiguration.WebViewFallback
+                                CustomTabsBuilder.WebViewFallback
                             );
             }
             else
             {
                 // plain CustomTabs no customizations
                 CustomTabsIntent i = new CustomTabsIntent.Builder().Build();
-                i.Intent.AddFlags(CustomTabsConfiguration.ActivityFlags);
+                i.Intent.AddFlags(CustomTabsBuilder.ActivityFlags);
 
-                i.LaunchUrl(this, CustomTabsConfiguration.UriAndroidOS);
+                i.LaunchUrl(this, CustomTabsBuilder.UriAndroidOS);
             }
             //.......................................................
             // Launching CustomTabs and url - if WarmUp and Prefetching is used
@@ -278,7 +278,7 @@ namespace Xamarin.Auth._MobileServices
                     (
                         () =>
                         {
-                            string msg = CustomTabsConfiguration.CustomTabsClosingMessage;
+                            string msg = CustomTabsBuilder.CustomTabsClosingMessage;
 
                             if (msg != null)
                             {
