@@ -14,13 +14,10 @@
 //    limitations under the License.
 //
 using System;
-using System.Collections.Generic;
-using System.Linq;
-
+using System.Threading.Tasks;
 using Android.OS;
 using Android.App;
 using Android.Widget;
-using Android.Support.CustomTabs;
 using Xamarin.Utilities.Android;
 
 using Plugin.Threading;
@@ -31,99 +28,81 @@ namespace Xamarin.Auth
 namespace Xamarin.Auth._MobileServices
 #endif
 {
-    [Activity
-        (
-            Label = "Web Authenticator Native Browser",
-            // NoHistory = true,
-            LaunchMode = global::Android.Content.PM.LaunchMode.SingleTop
-        )
-    ]
-    #if XAMARIN_AUTH_INTERNAL
+    [Activity(Label = "Web Authenticator Native Browser", LaunchMode = global::Android.Content.PM.LaunchMode.SingleTop)]
+#if XAMARIN_AUTH_INTERNAL
     internal partial class WebAuthenticatorNativeBrowserActivity : global::Android.Accounts.AccountAuthenticatorActivity
-    #else
+#else
     public partial class WebAuthenticatorNativeBrowserActivity : global::Android.Accounts.AccountAuthenticatorActivity
-    #endif
+#endif
     {
         internal class State : Java.Lang.Object
         {
-            public WebAuthenticator Authenticator;
+            public Uri Uri { get; set; }
+            public WebAuthenticator Authenticator { get; set; }
         }
+
+        private static readonly string CustomTabsClosingMessage = "If CustomTabs Login Screen does not close automatically" + System.Environment.NewLine + "close CustomTabs by navigating back to the app.";
 
         internal static readonly ActivityStateRepository<State> StateRepo = new ActivityStateRepository<State>();
 
-        State state;
+        private State state;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
 
-            //--------------------------------------------------------------
-            // Azure Mobile Services Team uses simplified code
-            // this is for testing purposes of their launch only
-            LaunchCustomTabsWithUrl =
-                    //LaunchCustomTabsWithUrlDefault
-                    LaunchCustomTabsWithUrlAzureMobileServiceClientTeamCode
-                    ;
-            //--------------------------------------------------------------
-
-            //
             // Load the state either from a configuration change or from the intent.
-            //
-            // *
-            state = LastNonConfigurationInstance as State;
-            if (state == null && Intent.HasExtra("StateKey"))
+            this.state = LastNonConfigurationInstance as State;
+
+            if (this.state == null && Intent.HasExtra("StateKey"))
             {
                 var stateKey = Intent.GetStringExtra("StateKey");
-                state = StateRepo.Remove(stateKey);
+
+                this.state = WebAuthenticatorNativeBrowserActivity.StateRepo.Remove(stateKey);
             }
 
-            if (state == null)
+            if (this.state == null)
             {
-                Finish();
+                this.Finish();
+
                 return;
             }
 
-            //Title = state.Authenticator.Title;
-
-            //
             // Watch for completion
-            //
-            state.Authenticator.Completed +=
-                (s, e) =>
-                {
-                    SetResult(e.IsAuthenticated ? Result.Ok : Result.Canceled);
-
-                    #region
-                    ///-------------------------------------------------------------------------------------------------
-                    /// Pull Request - manually added/fixed
-                    ///		Added IsAuthenticated check #88
-                    ///		https://github.com/xamarin/Xamarin.Auth/pull/88
-                    if (e.IsAuthenticated)
-                    {
-                        if (state.Authenticator.GetAccountResult != null)
-                        {
-                            var accountResult = state.Authenticator.GetAccountResult(e.Account);
-
-                            Bundle result = new Bundle();
-                            result.PutString(global::Android.Accounts.AccountManager.KeyAccountType, accountResult.AccountType);
-                            result.PutString(global::Android.Accounts.AccountManager.KeyAccountName, accountResult.Name);
-                            result.PutString(global::Android.Accounts.AccountManager.KeyAuthtoken, accountResult.Token);
-                            result.PutString(global::Android.Accounts.AccountManager.KeyAccountAuthenticatorResponse, e.Account.Serialize());
-
-                            SetAccountAuthenticatorResult(result);
-                        }
-                    }
-                    ///-------------------------------------------------------------------------------------------------
-                    #endregion
-
-                    CloseCustomTabs();
-                };
-
-            state.Authenticator.Error +=
-            (s, e) =>
+            this.state.Authenticator.Completed += (s, e) =>
             {
-                if (!state.Authenticator.ShowErrors)
+                SetResult(e.IsAuthenticated ? Result.Ok : Result.Canceled);
+
+                ///-------------------------------------------------------------------------------------------------
+                /// Pull Request - manually added/fixed
+                ///		Added IsAuthenticated check #88
+                ///		https://github.com/xamarin/Xamarin.Auth/pull/88
+                if (e.IsAuthenticated)
+                {
+                    if (this.state.Authenticator.GetAccountResult != null)
+                    {
+                        var accountResult = this.state.Authenticator.GetAccountResult(e.Account);
+
+                        var result = new Bundle();
+
+                        result.PutString(global::Android.Accounts.AccountManager.KeyAccountType, accountResult.AccountType);
+                        result.PutString(global::Android.Accounts.AccountManager.KeyAccountName, accountResult.Name);
+                        result.PutString(global::Android.Accounts.AccountManager.KeyAuthtoken, accountResult.Token);
+                        result.PutString(global::Android.Accounts.AccountManager.KeyAccountAuthenticatorResponse, e.Account.Serialize());
+
+                        this.SetAccountAuthenticatorResult(result);
+                    }
+                }
+
+                this.CloseCustomTabs();
+            };
+
+            this.state.Authenticator.Error += (s, e) =>
+            {
+                if (!this.state.Authenticator.ShowErrors)
+                {
                     return;
+                }
 
                 if (e.Exception != null)
                 {
@@ -133,120 +112,26 @@ namespace Xamarin.Auth._MobileServices
                 {
                     this.ShowError("Authentication Error e.Message = ", e.Message);
                 }
-                BeginLoadingInitialUrl();
+
+                this.BeginLoadingInitialUrl();
             };
 
-            // Build the UI
-            CustomTabsBuilder.Initialize(this);
-            CustomTabsBuilder.UICustomization();
+            // TODO - Store the CustomTabsBuilder instance in the State class and pass through the (authenticator?) code
+            var manager = new CustomTabsManager(this);
+            var builder = manager.CreateBuilder();
 
-            LaunchCustomTabsWithUrl();
-
-            return;
+            builder.LaunchUri(this.state.Uri);
         }
 
-        public Action LaunchCustomTabsWithUrl
-        {
-            get;
-            set;
-        }
-
-        private void LaunchCustomTabsWithUrlAzureMobileServiceClientTeamCode()
-        {
-            CustomTabsBuilder
-                .CustomTabActivityHelper
-                    .LaunchUrlWithCustomTabsOrFallback
-                        (
-                            // Activity/Context
-                            this,
-                            // CustomTabIntent
-                            CustomTabsBuilder.CustomTabsIntent,
-                            CustomTabsBuilder.PackageForCustomTabs,
-                            CustomTabsBuilder.UriAndroidOS,
-                            //  Fallback if CustomTabs do not exist
-                            CustomTabsBuilder.WebViewFallback
-                        );
-
-            return;
-        }
-
-        public void LaunchCustomTabsWithUrlDefault()
-        {
-            //.......................................................
-            // Launching CustomTabs and url - minimal
-            if
-                (
-                    CustomTabsBuilder.CustomTabActivityHelper != null
-                    &&
-                    CustomTabsBuilder.CustomTabsIntent != null
-                    &&
-                    CustomTabsBuilder.UriAndroidOS != null
-                )
-            {
-                CustomTabsBuilder
-                    .CustomTabsIntent
-                    .Intent.AddFlags(CustomTabsBuilder.ActivityFlags);
-
-                CustomTabsBuilder
-                    .CustomTabActivityHelper
-                        .LaunchUrlWithCustomTabsOrFallback
-                            (
-                                // Activity/Context
-                                this,
-                                // CustomTabInten
-                                CustomTabsBuilder.CustomTabsIntent,
-                                CustomTabsBuilder.PackageForCustomTabs,
-                                CustomTabsBuilder.UriAndroidOS,
-                                //  Fallback if CustomTabs do not exis
-                                CustomTabsBuilder.WebViewFallback
-                            );
-            }
-            else
-            {
-                // plain CustomTabs no customizations
-                CustomTabsIntent i = new CustomTabsIntent.Builder().Build();
-                i.Intent.AddFlags(CustomTabsBuilder.ActivityFlags);
-
-                i.LaunchUrl(this, CustomTabsBuilder.UriAndroidOS);
-            }
-            //.......................................................
-            // Launching CustomTabs and url - if WarmUp and Prefetching is used
-            /*
-            */
-            //---------------------------------------------------------------------------------
-
-            //
-            // Restore the UI state or start over
-            //
-            /*
-            if (savedInstanceState != null)
-            {
-                //webView.RestoreState(savedInstanceState);
-            }
-            else
-            {
-                if (Intent.GetBooleanExtra("ClearCookies", true))
-                {
-                    WebAuthenticator.ClearCookies();
-                }
-                BeginLoadingInitialUrl();
-            }
-            */
-
-            return;
-        }
-
-        private bool customTabsShown = false;
+        private bool customTabsShown;
 
         protected override void OnPause()
         {
             base.OnPause();
-            customTabsShown = true;
 
-            return;
+            customTabsShown = true;
         }
 
-        #region
         ///-------------------------------------------------------------------------------------------------
         /// Pull Request - manually added/fixed
         ///     Added IsAuthenticated check #88
@@ -254,119 +139,71 @@ namespace Xamarin.Auth._MobileServices
         protected override void OnResume()
         {
             base.OnResume();
-            if
-                (
-                    state.Authenticator.AllowCancel
-                    &&
-                    // mc++ state.Authenticator.IsAuthenticated()   // Azure Mobile Services Client fix
-                    customTabsShown                                 // Azure Mobile Services Client fix
+
+            if (this.state.Authenticator.AllowCancel &&
+                // mc++ state.Authenticator.IsAuthenticated()   // Azure Mobile Services Client fix
+                customTabsShown                                 // Azure Mobile Services Client fix
                 )
             {
-                state.Authenticator.OnCancelled();
+                this.state.Authenticator.OnCancelled();
             }
 
             customTabsShown = false;
-
-            return;
         }
         ///-------------------------------------------------------------------------------------------------
-        #endregion
+
         protected void CloseCustomTabs()
         {
-            UIThreadRunInvoker ri = new UIThreadRunInvoker(this);
-            ri.BeginInvokeOnUIThread
-                    (
-                        () =>
-                        {
-                            string msg = CustomTabsBuilder.CustomTabsClosingMessage;
+            var ri = new UIThreadRunInvoker(this);
 
-                            if (msg != null)
-                            {
-                                Toast.MakeText(this, msg, ToastLength.Short).Show();
-                            }
-                        }
-                    );
+            ri.BeginInvokeOnUIThread(() =>
+            {
+                string msg = WebAuthenticatorNativeBrowserActivity.CustomTabsClosingMessage;
 
-            #if DEBUG
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            sb.AppendLine($"      CloseCustomTabs");
-            System.Diagnostics.Debug.WriteLine(sb.ToString());
-            #endif
+                if (msg != null)
+                {
+                    Toast.MakeText(this, msg, ToastLength.Short).Show();
+                }
+            });
+
+            System.Diagnostics.Debug.WriteLine("      CloseCustomTabs");
 
             this.Finish();
-            //this.CloseCustomTabsProcessKill();
-
-            return;
         }
 
-        protected void CloseCustomTabsProcessKill()
+        private void BeginLoadingInitialUrl()
         {
-            System.Diagnostics.Debug.WriteLine($"      CloseCustomTabs");
-            ;
-            ActivityManager manager = GetSystemService(global::Android.Content.Context.ActivityService) as ActivityManager;
-            List<ActivityManager.RunningAppProcessInfo> processes = manager.RunningAppProcesses.ToList();
-            //List<ActivityManager.RunningTaskInfo> tasks = (manager.Get().ToList();
-
-            foreach (ActivityManager.RunningAppProcessInfo process in processes)
+            this.state.Authenticator.GetInitialUrlAsync().ContinueWith(t =>
             {
-                String name = process.ProcessName;
-
-                System.Diagnostics.Debug.WriteLine($"      process");
-                System.Diagnostics.Debug.WriteLine($"          .Pid = {process.Pid}");
-                System.Diagnostics.Debug.WriteLine($"          .ProcessName = {process.ProcessName}");
-
-                if
-                    (
-                        name.Contains("com.android.browser")
-                    )
+                if (t.IsFaulted)
                 {
-                    int pid = process.Pid;
-                    Process.KillProcess(pid);
-                }
-
-            }
-
-            return;
-        }
-
-
-        void BeginLoadingInitialUrl()
-        {
-            state.Authenticator.GetInitialUrlAsync().ContinueWith
-                (
-                    t =>
+                    if (!this.state.Authenticator.ShowErrors)
                     {
-                        if (t.IsFaulted)
-                        {
-                            if (!state.Authenticator.ShowErrors)
-                                return;
+                        return;
+                    }
 
-                            this.ShowError("Authentication Error t.Exception = ", t.Exception);
-                        }
-                        else
-                        {
-                            //TODO: webView.LoadUrl(t.Result.AbsoluteUri);
-                        }
-                    }, 
-                    System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext()
-                );
+                    this.ShowError("Authentication Error t.Exception = ", t.Exception);
+                }
+                else
+                {
+                    //TODO: webView.LoadUrl(t.Result.AbsoluteUri);
+                }
+            }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         public override void OnBackPressed()
         {
-            if (state.Authenticator.AllowCancel)
+            if (this.state.Authenticator.AllowCancel)
             {
-                state.Authenticator.OnCancelled();
+                this.state.Authenticator.OnCancelled();
             }
 
             this.Finish();
-
-            return;
         }
 
         public override Java.Lang.Object OnRetainNonConfigurationInstance()
         {
-            return state;
+            return this.state;
         }
 
         protected override void OnSaveInstanceState(Bundle outState)
@@ -375,16 +212,14 @@ namespace Xamarin.Auth._MobileServices
             // TODO: webView.SaveState(outState);
         }
 
-        void BeginProgress(string message)
+        private void BeginProgress(string message)
         {
             // TODO: webView.Enabled = false;
         }
 
-        void EndProgress()
+        private void EndProgress()
         {
             // TODO: webView.Enabled = true;
         }
-
     }
 }
-

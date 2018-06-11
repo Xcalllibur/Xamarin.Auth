@@ -212,6 +212,7 @@
     <Compile Include="PlatformSpecific\FormAuthenticatorActivity.cs" />
     <Compile Include="PlatformSpecific\WebAuthenticatorActivity.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
+    <Compile Include="UINativeNonIntegratedBrowsers\CustomTabsManager.cs" />
     <Compile Include="WebAuthenticator.XamarinAndroid.cs" />
     <Compile Include="UINativeNonIntegratedBrowsers\WebAuthenticator.NativeUI.XamarinAndroid.cs" />
     <Compile Include="UINativeNonIntegratedBrowsers\CustomTabsUtilities\CustomTabActivityHelper.cs" />

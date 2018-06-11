@@ -43,13 +43,12 @@ namespace Xamarin.Auth._MobileServices
         protected virtual AuthenticateUIType GetPlatformUINative(UIContext context)
         {
             System.Uri uri_netfx = this.GetInitialUrlAsync().Result;
-            global::Android.Net.Uri uri_android = global::Android.Net.Uri.Parse(uri_netfx.AbsoluteUri);
-            CustomTabsBuilder.UriAndroidOS = uri_android;
             AuthenticateUIType ui = new AuthenticateUIType(context, typeof(WebAuthenticatorNativeBrowserActivity));
             ui.PutExtra("ClearCookies", ClearCookiesBeforeLogin);
             var state = new WebAuthenticatorNativeBrowserActivity.State
 			{
-				Authenticator = this,
+                Uri = uri_netfx,
+				Authenticator = this
 			};
             ui.PutExtra("StateKey", WebAuthenticatorNativeBrowserActivity.StateRepo.Add(state));
 
